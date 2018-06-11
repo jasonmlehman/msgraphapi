@@ -34,10 +34,10 @@ There is a lot of confusion online about how to setup the application access for
 # My personal use cases
 
 I am a Global administrator for a large tenant.  I needed some automation within various locations of Office 365 and Azure AD.  A lot of this automation could have been done with an Azure AD powershell module.  But, the idea of powershell makes me sick so I decided to hit the graph API with python.  Some of the things I needed to do include:  
-    - List all members of a given role within office 365 (i.e Get a list of all exchange service administrators)
-    - Query a local active directory group for members and grant those members access to a role in office 365 (query a local AD group         called "AZ_Exchange_Admin" and grant all users within that group the "Exchange Service Administrator" role within office 365.           This would prevent me from having to micro manage that group.
-    - Create Cloud only user accounts that aren't being federated with an existing directory
-    - etc
+*    List all members of a given role within office 365 (i.e Get a list of all exchange service administrators)
+*    Query a local active directory group for members and grant those members access to a role in office 365 (query a local AD group   *      called "AZ_Exchange_Admin" and grant all users within that group the "Exchange Service Administrator" role within office 365.          This would prevent me from having to micro manage that group.
+*    Create Cloud only user accounts that aren't being federated with an existing directory
+*    etc
 
 Since my application would be managing office 365 roles I needed to grant the application global administrator privelages.  The process for doing this is:
   1)  Download "Active Directory PowerShell Module"
