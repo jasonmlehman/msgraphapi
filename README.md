@@ -1,3 +1,25 @@
+# Installation
+
+Install directly from this repo via pip.
+
+* pip install git+https://github.com/jasonmlehman/msgraphapi.git
+
+Alternatively, as I can't seem to get the above to work on Windows, you can clone the repo, change to the top-level directory (with the setup.py file) and use pip to install the local files in "editable" mode (-e).
+
+* git clone https://github.com/jasonmlehman/msgraphapi.git
+* cd msgraphapi
+* pip install -e .
+
+Create a creds.json file as dicated here, copied locally (i.e. /etc/creds.json)
+
+https://github.com/jasonmlehman/msgraphapi/blob/master/msgraphapi/creds/creds.json
+
+Test config with the following command:
+
+listrolemembers -listrole TRUE -credpath /etc/creds.json
+
+The above command should list all available office 365 roles within the tenant
+
 # Microsoft GraphAPI interaction with Python
 
 Office 365 administrator enthusiasts that live and breathe python may find this module useful.
