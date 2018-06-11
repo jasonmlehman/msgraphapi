@@ -26,7 +26,6 @@ setup(
             'msgraphapi.creds'
             ],
         scripts=[
-            'tools/listrolemembers'
         ],
         entry_points={
             'console_scripts': [
