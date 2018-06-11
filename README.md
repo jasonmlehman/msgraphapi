@@ -24,20 +24,20 @@ The above command should list all available office 365 roles within the tenant
 
 To use within python to add a user to an office 365 role:
 
-from msgraphapi import msgraphapi
+      from msgraphapi import msgraphapi
 
-credfile = "/etc/creds.json"
-userupn = "john.doe@somewhere.onmicrosoft.com"
-rolename = "Exchange Service Administrator"
+      credfile = "/etc/creds.json"
+      userupn = "john.doe@somewhere.onmicrosoft.com"
+      rolename = "Exchange Service Administrator"
 
-r = msgraphapi(credfile)
+      r = msgraphapi(credfile)
 
-# Get the directory objects ID
-userupnid = r.getupnid(userupn)
-roleid = r.getroleid(userrole)
+      # Get the directory objects ID
+      userupnid = r.getupnid(userupn)
+      roleid = r.getroleid(rolename)
 
-result = r.addusertorole(userupnid,roleid)
-print(result)
+      result = r.addusertorole(userupnid,roleid)
+      print(result)
 
 
 # Microsoft GraphAPI interaction with Python
