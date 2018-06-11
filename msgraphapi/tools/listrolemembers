@@ -35,10 +35,6 @@ def main():
         	print("Please specify role using -role parameter")
 	        sys.exit(1)
 
-	if credpath == None:
-        	print("Please specify path to credentials file")
-	        sys.exit(1)
-
 	r = msgraphapi(credpath)
 
 	# Need to get the ID of the directory object for the role

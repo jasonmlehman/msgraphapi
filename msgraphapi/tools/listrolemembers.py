@@ -5,6 +5,7 @@ import sys
 # Lists all the members of an Office 365 Role
 # Usage example: python listrolemembers.py -role "Company administrator" -environment test
 # To get all roles available to query use: python listrolemembers.py -listrole TRUE -environment test
+# Credentials file must be specified, in json.  See sample creds file in repo
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -20,6 +21,9 @@ def main():
 	credpath = args.credpath
 	rolelist = args.listrole
 
+	if credpath == None:
+		print("Please specify path to credentials file using -credpath parameter")
+
 	if rolelist:
 	        r = msgraphapi(credpath)
         	result = r.listroles()
@@ -29,10 +33,6 @@ def main():
 
 	if role == None:
         	print("Please specify role using -role parameter")
-	        sys.exit(1)
-
-	if credpath == None:
-        	print("Please specify path to credentials file")
 	        sys.exit(1)
 
 	r = msgraphapi(credpath)
