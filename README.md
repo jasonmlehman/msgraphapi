@@ -14,11 +14,31 @@ Create a creds.json file as dicated here, copied locally (i.e. /etc/creds.json)
 
 https://github.com/jasonmlehman/msgraphapi/blob/master/msgraphapi/creds/creds.json
 
+# How to use
+
 Test config with the following command:
 
-listrolemembers -listrole TRUE -credpath /etc/creds.json
+      listrolemembers -listrole TRUE -credpath /etc/creds.json
 
 The above command should list all available office 365 roles within the tenant
+
+To use within python to add a user to an office 365 role:
+
+from msgraphapi import msgraphapi
+
+credfile = "/etc/creds.json"
+userupn = "john.doe@somewhere.onmicrosoft.com"
+rolename = "Exchange Service Administrator"
+
+r = msgraphapi(credfile)
+
+# Get the directory objects ID
+userupnid = r.getupnid(userupn)
+roleid = r.getroleid(userrole)
+
+result = r.addusertorole(userupnid,roleid)
+print(result)
+
 
 # Microsoft GraphAPI interaction with Python
 
