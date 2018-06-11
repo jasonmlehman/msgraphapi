@@ -46,6 +46,3 @@ def main():
 	result = r.listrolemembers(roleid)
 	for roles in result:
         	print roles
-
-if __name__ == "__main__":
-    main()
