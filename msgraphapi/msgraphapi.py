@@ -8,17 +8,10 @@ class msgraphapi:
 
         #constants
 
-        def __init__(self, environment='prod'):
-		#  Update JSON files to match your enviroment(s)
-                if environment == "test":
-                       creds = json.load(open('creds/testcreds.json'))
-                elif environment == "prod":
-                       creds = json.load(open('creds/prodcreds.json'))
-                else:
-                    raise ValueError(
-                        'Please specify either prod or test as the environment')
-
-                self.clientid = creds["clientid"]
+        def __init__(self, credpath):
+		# credpath is the path to a json file containing tenant credentials
+                creds = json.load(open(credpath))
+		self.clientid = creds["clientid"]
                 self.client_secret = creds["clientsecret"]
                 self.login_url = creds["loginurl"]
                 self.tenant = creds["tenant"]
@@ -27,7 +20,6 @@ class msgraphapi:
                 self.bodyvals = {'client_id': self.clientid,
                     'client_secret': self.client_secret,
                     'grant_type': 'client_credentials'}
-
 
                 self.request_url = self.login_url + self.tenant + '/oauth2/token?api-version=beta'
                 self.token_response = requests.post(self.request_url, data=self.bodyvals)
