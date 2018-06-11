@@ -1,3 +1,7 @@
+# Microsoft GraphAPI interaction with Python
+
+Office 365 administrator enthusiasts that live and breathe python may find this module useful.
+
 # Installation
 
 Install directly from this repo via pip.
@@ -38,11 +42,6 @@ To use within python to add a user to an office 365 role:
 
       result = r.addusertorole(userupnid,roleid)
       print(result)
-
-
-# Microsoft GraphAPI interaction with Python
-
-Office 365 administrator enthusiasts that live and breathe python may find this module useful.
 
 # Prerequisites
 
