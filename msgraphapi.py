@@ -9,7 +9,7 @@ class msgraphapi:
         #constants
 
         def __init__(self, environment='prod'):
-		#  Test/prod environment.  Create a json file that contains
+		#  Update JSON files to match your enviroment(s)
                 if environment == "test":
                        creds = json.load(open('testcreds.json'))
                 elif environment == "prod":
