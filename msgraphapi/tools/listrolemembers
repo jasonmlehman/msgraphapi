@@ -10,18 +10,18 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-role', '--role',
 	                    help='The Office 365 Role to query')
-	parser.add_argument('-environment', '--environment',
-        	            help='select environment: test/prod')
+	parser.add_argument('-credpath', '--credpath',
+        	            help='path to JSON file containing O365 credentials')
 	parser.add_argument('-listrole', '--listrole',
         	            help='If argument is set will list all available office 365 roles')
 
 	args = parser.parse_args()
 	role = args.role
-	env = args.environment
+	credpath = args.credpath
 	rolelist = args.listrole
 
 	if rolelist:
-	        r = msgraphapi(environment=env)
+	        r = msgraphapi(credpath)
         	result = r.listroles()
 	        for roles in result:
         	        print roles
@@ -31,11 +31,11 @@ def main():
         	print("Please specify role using -role parameter")
 	        sys.exit(1)
 
-	if env == None:
-        	print("Please specify environment (test/prod) using -environment parameter")
+	if credpath == None:
+        	print("Please specify path to credentials file")
 	        sys.exit(1)
 
-	r = msgraphapi(environment=env)
+	r = msgraphapi(credpath)
 
 	# Need to get the ID of the directory object for the role
 
