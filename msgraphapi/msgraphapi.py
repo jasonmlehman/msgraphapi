@@ -11,9 +11,9 @@ class msgraphapi:
         def __init__(self, environment='prod'):
 		#  Update JSON files to match your enviroment(s)
                 if environment == "test":
-                       creds = json.load(open('testcreds.json'))
+                       creds = json.load(open('creds/testcreds.json'))
                 elif environment == "prod":
-                       creds = json.load(open('prodcreds.json'))
+                       creds = json.load(open('creds/prodcreds.json'))
                 else:
                     raise ValueError(
                         'Please specify either prod or test as the environment')
