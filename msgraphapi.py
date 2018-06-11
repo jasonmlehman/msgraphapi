@@ -9,10 +9,11 @@ class msgraphapi:
         #constants
 
         def __init__(self, environment='prod'):
+		#  Test/prod environment.  Create a json file that contains
                 if environment == "test":
-                       creds = json.load(open('/mnt/nfs/infradev/config/msgraphtest.json'))
+                       creds = json.load(open('testcreds.json'))
                 elif environment == "prod":
-                       creds = json.load(open('/mnt/nfs/infradev/config/o365cred.ini'))
+                       creds = json.load(open('prodcreds.json'))
                 else:
                     raise ValueError(
                         'Please specify either prod or test as the environment')
