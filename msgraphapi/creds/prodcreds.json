@@ -1,6 +1,0 @@
-{
-        "clientid": "123*",
-        "clientsecret": "123*",
-        "loginurl": "https://login.microsoftonline.com/",
-        "tenant": "yourdomain.onmicrosoft.com"
-}
