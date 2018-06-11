@@ -4,7 +4,7 @@ import sys
 
 # Lists all the members of an Office 365 Role
 # Usage example: python listrolemembers.py -role "Company administrator" -environment test
-# To get all roles available to query use: python listrolemembers.py -listrole TRUE
+# To get all roles available to query use: python listrolemembers.py -listrole TRUE -environment test
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-role', '--role',
