@@ -10,7 +10,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-role', '--role',
 	                    help='The Office 365 Role to query')
-		parser.add_argument('-environment', '--environment',
+	parser.add_argument('-environment', '--environment',
         	            help='select environment: test/prod')
 	parser.add_argument('-listrole', '--listrole',
         	            help='If argument is set will list all available office 365 roles')
