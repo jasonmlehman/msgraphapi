@@ -126,7 +126,7 @@ class msgraphapi:
 
                 request_string = 'https://graph.windows.net/' + self.tenant + '/directoryRoles/' + roleguid + '/$links/members?api-version=beta'
                 request_body = json.dumps({
-                        "url": "https://graph.windows.net/spectrumhealthtest.onmicrosoft.com/directoryObjects/" + userguid
+                        "url": "https://graph.windows.net/" + self.tenant + "/directoryObjects/" + userguid
                 })
                 response = requests.post(request_string, data=request_body, headers=header)
 
