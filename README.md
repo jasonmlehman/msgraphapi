@@ -80,13 +80,13 @@ I am a Global administrator for a large tenant.  I needed some automation within
 *    Create Cloud only user accounts that aren't being federated with an existing directory
 *    etc
 
-Since my application would be managing office 365 roles I needed to grant the application global administrator privelages.  The process for doing this is:
+Since my application would be managing office 365 roles I needed to grant the application Privileged role administrator.  The process for doing this is:
   1)  Download "Active Directory PowerShell Module"
   2)  Open "Active Directory PowerShell Module" as administrator
   3)  Type "connect-msolservice"
   4)  When prompted enter global admin tenant permissions
   5)  Type "$sp = Get-MsolServicePrincipal -AppPrincipalId <App ID GUID>"  This is your application ID found from the application             created perviously.
-  6)  Type "$role = Get-MsolRole -RoleName "Company Administrator"
+  6)  Type "$role = Get-MsolRole -RoleName "Privileged role administrator"
   7)  Type "Add-MsolRoleMember -RoleObjectId $role.ObjectId -RoleMemberType ServicePrincipal -RoleMemberObjectId $sp.ObjectId"
   8)  To validate it's created you can type "Get-MsolRoleMember -RoleObjectId $role.ObjectId"
 
