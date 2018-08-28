@@ -1,6 +1,6 @@
 # Microsoft GraphAPI interaction with Python
 
-Office 365 administrator enthusiasts that live and breathe python may find this module useful.
+Office 365 administrator enthusiasts that live and breathe python may find this module useful.  This module uses, and shows you how to use all API's used by Microsoft Administrators.  Office 365 Management API (used to query Audit logs), Azure AD Graph API, and the MSGraphAPI.  The requests for tokens is different for each of these API's.  These can easily be translated to powershell if you choose.
 
 # Installation
 
