@@ -72,13 +72,11 @@ class msgraphapi:
                 self.token_response = requests.post(self.request_url, data=self.bodyvals, headers=self.header_params2)
 
                 self.access_token3 = self.token_response.json().get('access_token')
-#                print(self.token_response.json())
                 self.token_type = self.token_response.json().get('token_type')
                 if self.access_token3 is None or self.token_type is None:
                         print("ERROR: Couldn't get access token")
                         sys.exit(1)
                 self.header_params_MOC = {'Authorization': self.token_type + ' ' + self.access_token3}
-#		print self.header_params_MOC
 
         def graphapirequest(self,request_string):
                 header_params = {'Authorization': self.token_type + ' ' + self.access_token}
@@ -87,6 +85,7 @@ class msgraphapi:
                 return data
 
         def createuser(self,userupn,displayname,password,mailnickname):
+		# Creates a user in the tenant
                 header_params = {
                         'Authorization': self.token_type + ' ' + self.access_token,
                         'Content-Type': 'application/json'
@@ -107,6 +106,7 @@ class msgraphapi:
                 return data
 
         def getroleid(self,rolename):
+		# Gets the GUID given a role name
                 request_string = 'https://graph.windows.net/' + self.tenant + '/directoryRoles?api-version=1.6'
 		while True:
 			try:
@@ -126,10 +126,17 @@ class msgraphapi:
                         return "Role not found"
 
         def getupnid(self, upn):
+		# Gets the guid of a user given the UPN name
                 request_string = 'https://graph.microsoft.com/v1.0/users/' + upn
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
                 return data['id']
+
+        def getb2binfo(self, guid):
+                request_string = 'https://graph.microsoft.com/v1.0/users/' + guid
+                response = requests.get(request_string, headers=self.header_params_GMC)
+                data = response.json()
+                return data
 
 	def getusers(self):
 		request_string = 'https://graph.microsoft.com/v1.0/users/'
@@ -138,14 +145,11 @@ class msgraphapi:
 		users = []
 		for user in data['value']:
 			if user['mail'] != "None":
-#				users.append(user['userPrincipalName'])
 				users.append(user['mail'])
-#		return users
 		return json.dumps(users, indent=4, sort_keys=True)
 
         def getmailusers(self):
                	request_string = "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D7')?$format=application/json"
-#		request_string = "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail?$format=application/json"
                	response = requests.get(request_string, headers=self.header_params_GMC)
 		data = response.json()
 		users = []
@@ -155,6 +159,7 @@ class msgraphapi:
                 return json.dumps(data, indent=4, sort_keys=True)
 
         def listroles(self):
+		# Lists all roles in the tenant
                 request_string = 'https://graph.windows.net/' + self.tenant + '/directoryRoles?api-version=beta'
                 response = requests.get(request_string, headers=self.header_params)
                 data = response.json()
@@ -165,6 +170,7 @@ class msgraphapi:
                 return roles
 
         def addusertorole(self, userguid, roleguid):
+		# Adds a user to a role given the userguid and role guid
                 header = {
                         "Content-type": "application/json",
                         "Authorization": "Bearer " + self.access_token
@@ -184,6 +190,7 @@ class msgraphapi:
                         return "Success"
 
         def removeuserfromrole(self, userguid, roleguid):
+		# Removes a user from a role
                 header = {
                         "Content-type": "application/json",
                         "Authorization": "Bearer " + self.access_token
@@ -199,6 +206,7 @@ class msgraphapi:
                         return "Success"
 
         def listrolemembers(self,roleguid):
+		# Lists the members assgined to a role guid
                 request_string = 'https://graph.windows.net/' + self.tenant + '/directoryRoles/' + roleguid + '/members/?api-version=1.6'
 		while True:
 			try:
@@ -267,12 +275,16 @@ class msgraphapi:
                 return json.dumps(data)
 
 	def getriskyevents(self, numofdays='90'):
+		# Gest the last 90 days of risky events
+
                 request_string = 'https://graph.microsoft.com/beta/identityRiskEvents/'
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
 
         def listrolesv2(self):
+		# List Office 365 roles
+
                 request_string = 'https://graph.microsoft.com/beta/directoryRoles'
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -286,6 +298,7 @@ class msgraphapi:
                 return json.dumps(data, indent=4, sort_keys=True)
 
         def activaterole(self,roleid):
+		# Not all roles are available via the API by default, this activates the ones that aren't
 		header = {
 			"Content-type": "application/json",
 			"Authorization": "Bearer " + self.access_token2
@@ -299,6 +312,8 @@ class msgraphapi:
                 return json.dumps(data, indent=4, sort_keys=True)
 
         def addmembertorole(self,upn,roleguid):
+		# Adds a member to a role
+
                 header = {
                         "Content-type": "application/json",
                         "Authorization": "Bearer " + self.access_token2
@@ -315,9 +330,25 @@ class msgraphapi:
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
 
+        def updatememberuser(self,guid):
+		# This changes a guest user to a member of the directory
+
+                header = {
+                        "Content-type": "application/json",
+                        "Authorization": "Bearer " + self.access_token2
+                }
+                request_string = 'https://graph.microsoft.com/v1.0/users/%s' % guid
+                print(request_string)
+                request_body = json.dumps({
+                        "userType": "Member"
+                })
+                response = requests.patch(request_string, data=request_body,headers=header)
+                return response 
+
         def getauditdata(self, logtype, folderpath=None, publisherid='self.tenant'):
 		# Gets the last 24 hours worth of content
 		# Contentype must be Audit.SharePoint, Audit.AzureActiveDirectory, Audit.Exchange, Audit.General, or DLP.All
+
                 request_string = 'https://manage.office.com/api/v1.0/' + self.tenant + '/activity/feed/subscriptions/content?contentType=' + logtype + '&PublisherIdentifier=' + publisherid
 
                 page0 = requests.get(request_string, headers=self.header_params_MOC)
@@ -361,6 +392,8 @@ class msgraphapi:
 		return json.dumps(blobdata, indent=4, sort_keys=True)
 
         def skuinuse(self,skuid):
+		# For licensing reporting, gets the number of units used for a skuid
+
                 request_string = "https://graph.microsoft.com/v1.0/subscribedSkus"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -372,12 +405,16 @@ class msgraphapi:
 		return inuse,total,percentinuse
 
 	def getsecurescore(self):
+		# Gets secure score stuff
+
 		request_string = "https://graph.microsoft.com/stagingBeta/reports/getTenantSecureScores(period=1)/content"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
 
         def getsignins(self):
+		# Gets signins from the audit logs
+
                 request_string = "https://graph.microsoft.com/beta/auditLogs/signIns"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -403,6 +440,8 @@ class msgraphapi:
                 return groupname
 
         def listmembersofgroup(self, directoryid):
+		# Lists the members of a group
+
                 request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/members"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -416,35 +455,44 @@ class msgraphapi:
 				members.append(upn)
 		return groupname, members
 
-        def listmembers(self, directoryid):
+        def listguidofgroup(self, directoryid):
+		# Gets all the guids of the members of a group
+
                 request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/members"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
-
-		grouparray = {}
-
-		initname, initmembers = self.listmembersofgroup(directoryid)
-
-		grouparray[initname] = initmembers
-		for member in data['value']:
-			if member["@odata.type"] == "#microsoft.graph.group":
-				gname, gmembers = self.listmembersofgroup(member["id"])
-				grouparray[gname] = gmembers
-		return json.dumps(grouparray, indent=4, sort_keys=True)
-
-        def getnestedgroups(self, directoryid):
-                request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/members"
-                response = requests.get(request_string, headers=self.header_params_GMC)
-                data = response.json()
-                grouparray = []
+                memberguids = []
                 for member in data['value']:
-                        if member["@odata.type"] == "#microsoft.graph.group":
-				grouparray.append(member["id"])
-				self.getnestedgroups(member["id"])
-		return grouparray
-								
+			if member["@odata.type"] == "#microsoft.graph.user":
+				guid = member['id']
+				memberguids.append(guid)
+                return memberguids
+
+        def listmembers(self, directoryid):
+		# Gets the UPN's of users of a group
+
+                request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/members"
+                response = requests.get(request_string, headers=self.header_params_GMC)
+                data = response.json()
+
+                member_list = data['value']
+                next_url = ''
+                while True:
+                        if '@odata.nextLink' in data:
+                                if data['@odata.nextLink'] == next_url:
+                                        break
+                                next_url = data['@odata.nextLink']
+                                next_data = requests.get(next_url, headers=self.header_params_GMC).json()
+                                member_list += next_data['value']
+                                data = next_data
+                        else:
+                                break
+		membersupn = [x['userPrincipalName'] for x in member_list if 'userPrincipalName' in x]
+                return membersupn
 
         def getgroupdeletedate(self):
+		# Gets all Office 365 groups deleted in the last 30 days
+
                 request_string = "https://graph.microsoft.com/v1.0/directory/deletedItems/microsoft.graph.group"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -462,6 +510,8 @@ class msgraphapi:
 		return json.dumps(sorted_g, indent=4)
 
 	def geto365groups(self):
+		# Gets the GUIDs of all Office 365 groups
+
                 request_string = "https://graph.microsoft.com/v1.0/groups?$filter=groupTypes/any(c:c+eq+'Unified')"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -471,6 +521,8 @@ class msgraphapi:
 		return groups
 
         def geto365groupowner(self, directoryid):
+		# Gets all office 365 groups without owners
+
                 request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/owners"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
@@ -480,6 +532,9 @@ class msgraphapi:
                 return owners
 
         def inviteuser(self,usermail,url):
+		# Invites a guest to a tenant without sending an email
+		# Change sendInvitationMessage to True to trigger an email
+
                 header = {
                         "Content-type": "application/json",
                         "Authorization": "Bearer " + self.access_token2
@@ -488,7 +543,7 @@ class msgraphapi:
                 request_body = json.dumps({
                         "invitedUserEmailAddress": usermail,
 			"inviteRedirectUrl": url,
-			"sendInvitationMessage": True
+			"sendInvitationMessage": False
                 })
                 response = requests.post(request_string, data=request_body,headers=header)
                 data = response.json()
@@ -496,6 +551,8 @@ class msgraphapi:
 
 
         def addmembertogroup(self,upn,groupguid):
+		# Adds a user to a gropu
+
                 header = {
                         "Content-type": "application/json",
                         "Authorization": "Bearer " + self.access_token2
@@ -510,9 +567,32 @@ class msgraphapi:
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
 
+        def addguidtogroup(self,userguid,groupguid):
+		# Adds a user guid to a group guid
+
+                header = {
+                        "Content-type": "application/json",
+                        "Authorization": "Bearer " + self.access_token2
+                }
+                request_string = 'https://graph.microsoft.com/v1.0/groups/' + groupguid + '/members/$ref'
+                request_body = json.dumps({
+                        "@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/" + userguid
+                })
+                response = requests.post(request_string, data=request_body,headers=header)
+                return response
+
 	def getguestusers(self):
+		# Gets all guest users in a tenant
+
                 request_string = "https://graph.microsoft.com/v1.0/users?$filter=userType eq 'Guest'"
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
-#                return json.dumps(data, indent=4, sort_keys=True)
 		return data
+
+	def deleteuser(self, userid):
+		# Deletes a user from a tenant
+
+                request_string = "https://graph.microsoft.com/v1.0/users/%s/" % userid
+                response = requests.delete(request_string, headers=self.header_params_GMC)
+                return response
+
