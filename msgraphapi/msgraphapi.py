@@ -596,3 +596,10 @@ class msgraphapi:
                 response = requests.delete(request_string, headers=self.header_params_GMC)
                 return response
 
+		# Gets all mail enabled groups
+        def getdistgroups(self):
+                request_string = "https://graph.microsoft.com/v1.0/groups"
+                response = requests.get(request_string, headers=self.header_params_GMC)
+                data = response.json()
+                data = [x['displayName'] for x in data['value'] if x['mailEnabled'] is True]
+                return json.dumps(data, indent=4, sort_keys=True)
