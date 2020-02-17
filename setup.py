@@ -7,7 +7,7 @@ def readme():
 
 setup(
         name='msgraphapi',
-        version='0.1',
+        version='0.5',
         description='Python library interacting with the Microsoft Graph API',
         long_description=readme(),
         classifiers=[
