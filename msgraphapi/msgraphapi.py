@@ -277,7 +277,7 @@ class msgraphapi:
 	def getriskyevents(self, numofdays='90'):
 		# Gest the last 90 days of risky events
 
-                request_string = 'https://graph.microsoft.com/beta/identityRiskEvents/'
+                request_string = 'https://graph.microsoft.com/v1.0/identityRiskEvents/'
                 response = requests.get(request_string, headers=self.header_params_GMC)
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
