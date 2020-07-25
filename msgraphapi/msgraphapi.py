@@ -693,3 +693,10 @@ class msgraphapi:
                 response = requests.post(request_string, data=request_body,headers=header)
                 data = response.json()
                 return json.dumps(data, indent=4, sort_keys=True)
+        
+        def getsubs(self):
+
+              request_string = "https://graph.microsoft.com/v1.0/reports/getOffice365ActivationsUserDetail"
+              response = requests.get(request_string, headers=self.header_params_GMC)
+              return response.url
+
