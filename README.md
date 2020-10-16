@@ -71,22 +71,3 @@ There is a lot of confusion online about how to setup the application access for
   12) Select "Settings-Required Permissions"  You will have to give the permissions you will require depending on what you will do with       the API.  
   13) Select "Keys" and generate a secret
   14) Document application ID
-
-# My personal use cases
-
-I am a Global administrator for a large tenant.  I needed some automation within various locations of Office 365 and Azure AD.  A lot of this automation could have been done with an Azure AD powershell module.  But, the idea of powershell makes me sick so I decided to hit the graph API with python.  Some of the things I needed to do include:  
-*    List all members of a given role within office 365 (i.e Get a list of all exchange service administrators)
-*    Query a local active directory group for members and grant those members access to a role in office 365 (query a local AD group   *      called "AZ_Exchange_Admin" and grant all users within that group the "Exchange Service Administrator" role within office 365.          This would prevent me from having to micro manage that group.
-*    Create Cloud only user accounts that aren't being federated with an existing directory
-*    etc
-
-Since my application would be managing office 365 roles I needed to grant the application Privileged role administrator.  The process for doing this is:
-  1)  Download "Active Directory PowerShell Module"
-  2)  Open "Active Directory PowerShell Module" as administrator
-  3)  Type "connect-msolservice"
-  4)  When prompted enter global admin tenant permissions
-  5)  Type "$sp = Get-MsolServicePrincipal -AppPrincipalId <App ID GUID>"  This is your application ID found from the application             created perviously.
-  6)  Type "$role = Get-MsolRole -RoleName "Privileged role administrator"
-  7)  Type "Add-MsolRoleMember -RoleObjectId $role.ObjectId -RoleMemberType ServicePrincipal -RoleMemberObjectId $sp.ObjectId"
-  8)  To validate it's created you can type "Get-MsolRoleMember -RoleObjectId $role.ObjectId"
-
