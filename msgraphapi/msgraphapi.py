@@ -2,29 +2,24 @@
 from __future__ import division
 import requests
 import json
-import argparse
-import sys
 import datetime
-import time
-import uuid
 import urllib
 import csv
 from io import StringIO
 
 
 class msgraphapi:
-
-    # constants
+    """ graph api class"""
 
     def __init__(self, credpath):
-        # credpath is the path to a json file containing tenant credentials
+        """ credpath is the path to a json file containing tenant credentials """
         creds = json.load(open(credpath))
         self.clientid = creds["clientid"]
         self.client_secret = creds["clientsecret"]
         self.login_url = creds["loginurl"]
         self.tenant = creds["tenant"]
 
-        # Get an access token for the graph.microsoft.com API
+        """ Get an access token for the graph.microsoft.com API """
         self.bodyvals = dict(
             client_id=self.clientid,
             client_secret=self.client_secret,
@@ -51,7 +46,7 @@ class msgraphapi:
         self.gmc_session.headers = self.header_params_GMC
 
     def getroleid(self, rolename):
-        # Gets the guid of a role name
+        """ Gets the guid of a role name """
 
         request_string = f"{self.base_url}/directoryRoles"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -65,7 +60,7 @@ class msgraphapi:
             return "Role not found"
 
     def getuseridbyimmutableid(self, immutableid):
-        # Gets the Object ID for a user given the immutable ID
+        """ Gets the Object ID for a user given the immutable ID """
 
         url_encoded = urllib.parse.quote_plus(
             f"onPremisesImmutableId eq '{immutableid}'")
@@ -75,7 +70,7 @@ class msgraphapi:
         return data['value'][0]['id']
 
     def getuserupnbyimmutableid(self, immutableid):
-        # Gets the UPN for  auser given the immutable ID
+        """ Gets the UPN for  auser given the immutable ID """
 
         url_encoded = urllib.parse.quote_plus(
             f"onPremisesImmutableId eq '{immutableid}'")
@@ -85,7 +80,7 @@ class msgraphapi:
         return data['value'][0]['userPrincipalName']
 
     def getupnid(self, upn):
-        # Gets the guid of a user given the UPN name
+        """ Gets the guid of a user given the UPN name """
 
         url_encoded = urllib.parse.quote_plus(f"{upn}")
         request_string = f"{self.base_url}/users/{url_encoded}"
@@ -97,7 +92,7 @@ class msgraphapi:
             return "Notfound"
 
     def getupnfromguid(self, guid):
-        # Gets the upn of a user given the guid
+        """ Gets the upn of a user given the guid """
 
         request_string = f"{self.base_url}/users/{guid}"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -105,7 +100,7 @@ class msgraphapi:
         return data['userPrincipalName']
 
     def getuserattr(self, userguid):
-        # returns deleted user data based on guid
+        """ returns deleted user data based on guid """
 
         userguid = userguid.replace('-', '')
         request_string = f"{self.base_url}/directory/deletedItems/microsoft.graph.user?&$filter=id eq '{userguid}'"
@@ -114,7 +109,7 @@ class msgraphapi:
         return data['value'][0]
 
     def getuserdetails(self, userguid):
-        # returns detailed user data based on guid
+        """ returns detailed user data based on guid """
 
         request_string = f"{self.base_url}/users/{userguid}?$select=businessPhones,department,DisplayName,GivenName,mobilePhone,Surname,JobTitle,mail,manager"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -132,7 +127,7 @@ class msgraphapi:
             surname,
             jobTitle,
             mail):
-        # Updates the metadata for a user given the guid
+        """ Updates the metadata for a user given the guid """
 
         request_string = f"{self.base_url}/users/{userguid}"
         header = {
@@ -156,7 +151,7 @@ class msgraphapi:
         return response
 
     def getuserexists(self, upn):
-        # Check if a UPN exists in a tenant
+        """ Check if a UPN exists in a tenant """
 
         url_encoded = urllib.parse.quote_plus(f"userPrincipalName eq '{upn}'")
         request_string = f"{self.base_url}/users?&$filter={url_encoded}"
@@ -171,7 +166,7 @@ class msgraphapi:
             return "Error"
 
     def listroles(self):
-        # List Office 365 roles
+        """ List Office 365 roles """
 
         request_string = f"{self.base_url}/directoryRoles"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -180,7 +175,7 @@ class msgraphapi:
         return roles
 
     def addusertorole(self, userguid, roleguid):
-        # Adds a user to a role given the userguid and role guid
+        """ Adds a user to a role given the userguid and role guid """
 
         header = {
             "Content-type": "application/json",
@@ -200,7 +195,7 @@ class msgraphapi:
             return f"Failed to add userguid: {userguid}"
 
     def removeuserfromrole(self, userguid, roleguid):
-        # Adds a user to a role given the userguid and role guid
+        """ Adds a user to a role given the userguid and role guid """
 
         header = {
             "Content-type": "application/json",
@@ -214,7 +209,7 @@ class msgraphapi:
             return f"Failted to remove userguid: {userguid}"
 
     def listrolemembers(self, roleguid):
-        # lists the members assigned to a role guid
+        """ lists the members assigned to a role guid """
 
         request_string = f"{self.base_url}/directoryRoles/{roleguid}/members"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -224,10 +219,7 @@ class msgraphapi:
         return roles
 
     def auditlogbyid(self, directoryid):
-        # Provides (or gets) a specific Azure Active Directory audit log item.
-        # Permissions needed
-        #       Dellegated (work or school account): AuditLog.Read.All
-        #       Application:    AuditLog.Read.All
+        """ Provides (or gets) a specific Azure Active Directory audit log item """
 
         request_string = f"{self.base_url}/auditLogs/directoryAudits{directoryid}"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -235,9 +227,7 @@ class msgraphapi:
         return json.dumps(data)
 
     def auditlog(self, numofdays):
-        # Provides the list of audit logs generated by Azure Active Directory
-        # Permissions needed
-        #       Application:    AuditLog.Read.All
+        """ Provides the list of audit logs generated by Azure Active Directory """
 
         startdate = datetime.date.strftime(
             datetime.date.today() -
@@ -251,14 +241,14 @@ class msgraphapi:
         return json.dumps(data, indent=4, sort_keys=True)
 
     def getroletemplates(self):
+        """ get role template """
         request_string = f"{self.base_url}/directoryRoles"
         response = requests.get(request_string, headers=self.header_params_GMC)
         data = response.json()
         return json.dumps(data, indent=4, sort_keys=True)
 
     def activaterole(self, roleid):
-        # Not all roles are available via the API by default, this activates
-        # the ones that aren't
+        """ Activates directory roles """
         header = {
             "Content-type": "application/json",
             "Authorization": "Bearer " + self.access_token2
@@ -275,7 +265,7 @@ class msgraphapi:
         return json.dumps(data, indent=4, sort_keys=True)
 
     def addmembertorole(self, upn, roleguid):
-        # Adds a member to a role
+        """ Adds a member to a role """
 
         header = {
             "Content-type": "application/json",
@@ -294,7 +284,7 @@ class msgraphapi:
         return json.dumps(data, indent=4, sort_keys=True)
 
     def updatememberuser(self, guid):
-        # This changes a guest user to a member of the directory
+        """ This changes a guest user to a member of the directory """
 
         header = {
             "Content-type": "application/json",
@@ -311,7 +301,7 @@ class msgraphapi:
         return response
 
     def skuinuse(self, skuid):
-        # For licensing reporting, gets the number of units used for a skuid
+        """ For licensing reporting, gets the number of units used for a skuid """
 
         request_string = f"{self.base_url}/subscribedSkus"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -324,7 +314,7 @@ class msgraphapi:
         return inuse, total, percentinuse
 
     def getsignins(self):
-        # Gets signins from the audit logs
+        """ Gets signins from the audit logs """
 
         request_string = f"{self.base_url}/auditLogs/signIns"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -347,7 +337,7 @@ class msgraphapi:
         return groupname
 
     def listmembers(self, directoryid):
-        # Gets the UPN's of users of a group
+        """ Gets the UPN's of users of a group """
 
         request_string = f"{self.base_url}/groups/{directoryid}/members"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -371,7 +361,7 @@ class msgraphapi:
         return membersupn
 
     def listmembersid(self, directoryid):
-        # Gets the id's of users of a group
+        """ Gets the id's of users of a group """
 
         request_string = f"{self.base_url}/groups/{directoryid}/members"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -394,8 +384,7 @@ class msgraphapi:
         return membersid
 
     def listtransitivemembersupn(self, directoryid):
-        # Gets the UPN's of users of a group (including members of nested
-        # groups i.e. transitive)
+        """ Gets the transitive UPN's of users of a group """
 
         request_string = f"{self.base_url}/groups/{directoryid}/transitiveMembers/?$select=userPrincipalName"
 
@@ -419,8 +408,7 @@ class msgraphapi:
         return membersid
 
     def listtransitivemembersid(self, directoryid):
-        # Gets the id's of users of a group (including members of nested groups
-        # i.e. transitive)
+        """ Gets the transitive id's of users of a group """
 
         request_string = f"{self.base_url}/groups/{directoryid}/transitiveMembers/?$select=id"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -443,7 +431,7 @@ class msgraphapi:
         return membersid
 
     def getgroupdeletedate(self):
-        # Gets all Office 365 groups deleted in the last 30 days
+        """ Gets all Office 365 groups deleted in the last 30 days """
 
         request_string = f"{self.base_url}/directory/deletedItems/microsoft.graph.group"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -462,7 +450,7 @@ class msgraphapi:
         return json.dumps(sorted_g, indent=4)
 
     def geto365groups(self):
-        # Gets the GUIDs of all Office 365 groups
+        """ Gets the GUIDs of all Office 365 groups """
 
         request_string = f"{self.base_url}/groups?$filter=groupTypes/any(c:c+eq+'Unified')"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -473,7 +461,7 @@ class msgraphapi:
         return groups
 
     def geto365groupowner(self, directoryid):
-        # Gets all office 365 groups without owners
+        """ Gets all office 365 groups without owners """
 
         request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/owners"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -482,14 +470,13 @@ class msgraphapi:
         try:
             for owner in data['value']:
                 owners.append(owner['userPrincipalName'])
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            print(error)
             pass
         return owners
 
     def inviteuser(self, usermail, url):
-        # Invites a guest to a tenant without sending an email
-        # Change sendInvitationMessage to True to trigger an email
+        """ Invites a guest to a tenant without sending an email """
 
         header = {
             "Content-type": "application/json",
@@ -509,13 +496,13 @@ class msgraphapi:
         return json.dumps(data, indent=4, sort_keys=True)
 
     def addmembertogroup(self, upn, groupguid):
-        # Adds a user to a group based on UPN
+        """ Adds a user to a group based on UPN """
 
         userguid = self.getupnid(upn)
         self.addguidtogroup(userguid, groupguid)
 
     def addguidtogroup(self, userguid, groupguid):
-        # Adds a user guid to a group guid
+        """ Adds a user guid to a group guid """
 
         header = {
             "Content-type": "application/json",
@@ -532,14 +519,14 @@ class msgraphapi:
         return response
 
     def removememberfromgroup(self, upn, groupguid):
-        # Removes a user UPN from a group
+        """ Removes a user UPN from a group """
 
         userguid = self.getupnid(upn)
 
         self.removeguidfromgroup(userguid, groupguid)
 
     def removeguidfromgroup(self, userguid, groupuid):
-        # Remove a user guid from a group
+        """ Remove a user guid from a group """
 
         header = {
             "Content-type": "application/json",
@@ -550,7 +537,7 @@ class msgraphapi:
         return response
 
     def getguestusers(self):
-        # Gets all guest users in a tenant
+        """ Gets all guest users in a tenant """
 
         request_string = f"{self.base_url}/users?$filter=userType eq 'Guest'"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -574,7 +561,7 @@ class msgraphapi:
         return membersupn
 
     def getguestusersbyid(self):
-        # Gets all guest users in a tenant
+        """ Gets all guest users in a tenant """
 
         request_string = f"{self.base_url}/users?$filter=userType eq 'Guest'"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -597,7 +584,7 @@ class msgraphapi:
         return membersid
 
     def deleteuser(self, userid):
-        # Deletes a user from a tenant
+        """ Deletes a user from a tenant """
 
         url_encoded = urllib.parse.quote_plus(userid)
         request_string = f"{self.base_url}/users/{url_encoded}/"
@@ -606,7 +593,7 @@ class msgraphapi:
         return response
 
     def getchanneldata(self, teamid, channelid):
-        # Gets teams channel data
+        """ Gets teams channel data """
 
         request_string = f"{self.base_url}/teams/{teamid}/channels/{channelid}"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -614,7 +601,7 @@ class msgraphapi:
         return data
 
     def getchannels(self, teamid):
-        # Gets teams channel data
+        """ Gets teams channel data """
 
         request_string = f"{self.base_url}/teams/{teamid}/channels"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -622,8 +609,7 @@ class msgraphapi:
         return data
 
     def posttochannel(self, teamid, channelid):
-        # Not all roles are available via the API by default, this activates
-        # the ones that aren't
+        """ Posts to  channel """
 
         header = {
             "Content-type": "application/json",
@@ -646,7 +632,7 @@ class msgraphapi:
         return json.dumps(data, indent=4, sort_keys=True)
 
     def getlastsign(self, upn):
-        # Gets signins from the audit logs
+        """ Gets signins from the audit logs """
 
         request_string = f"{self.base_url}/auditLogs/signIns?&$filter=userPrincipalName eq '{upn}'"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -655,7 +641,7 @@ class msgraphapi:
         return signins
 
     def getloggedin(self, upn):
-        # Gets signins from the audit logs
+        """ Gets signins from the audit logs """
 
         request_string = f"{self.base_url}/auditLogs/signIns?&$filter=userPrincipalName eq '{upn}'"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -671,7 +657,7 @@ class msgraphapi:
             return f"{upn},error"
 
     def getgroupid(self, groupname):
-        # Gets the ID of a group from it's displayname
+        """ Gets the ID of a group from it's displayname """
 
         request_string = f"{self.base_url}/groups?$filter=displayName eq '{groupname}'"
         header = {
@@ -683,7 +669,7 @@ class msgraphapi:
         return data['value'][0]['id']
 
     def getsubs(self):
-        # Gets a download URL for the office activation detail for the tenant
+        """ Gets a download URL for the office activation detail for the tenant """
 
         request_string = "{self.base_url}/reports/getOffice365ActivationsUserDetail"
         response = requests.get(request_string, headers=self.header_params_GMC)
@@ -703,12 +689,8 @@ class msgraphapi:
                 report_list.append(row_dict)
         return report_list
 
-    # MICROSOFT 365 REPORTS
-
     def getmicrosoft365servicesusercounts(self, period: str = "D7"):
-        # GET /reports/getOffice365ServicesUserCounts(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get the count of users by activity type and service.
+        """ GET /reports/getOffice365ServicesUserCounts(period='D7') """
 
         request_string = f"{self.base_url}/reports/getOffice365ServicesUserCounts(period='{period}')"
 
@@ -722,11 +704,8 @@ class msgraphapi:
         return report_list
 
     def getmicrosoft365usercounts(self, period: str = "D7"):
-        # GET /reports/getOffice365ActiveUserCounts(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get the count of daily active users in the reporting period by
-        # product.
-
+        """ GET /reports/getOffice365ActiveUserCounts(period='D7') """
+        
         request_string = f"{self.base_url}/reports/getOffice365ActiveUserCounts(period='{period}')"
 
         try:
@@ -739,9 +718,7 @@ class msgraphapi:
         return report_list
 
     def getmicrosoft365userdetailsbyperiod(self, period: str = "D7"):
-        # GET /reports/getOffice365ActiveUserDetail(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get details about Microsoft 365 active users by period.
+        """ GET /reports/getOffice365ActiveUserDetail(period='D7') """
 
         request_string = f"{self.base_url}/reports/getOffice365ActiveUserDetail(period='{period}')"
 
@@ -755,9 +732,7 @@ class msgraphapi:
         return report_list
 
     def getmicrosoft365userdetailsbydate(self, date):
-        # GET /reports/getOffice365ActiveUserDetail(date=YYYY-MM-DD)
-        # Date format must be YYYY-MM-DD
-        # Get details about Microsoft 365 active users by date.
+        """ GET /reports/getOffice365ActiveUserDetail(date=YYYY-MM-DD) """
 
         request_string = f"{self.base_url}/reports/getOffice365ActiveUserDetail(date={date})"
 
@@ -770,11 +745,10 @@ class msgraphapi:
 
         return report_list
 
-    # EMAIL ACTIVITY REPORTS
+    """ EMAIL ACTIVITY REPORTS """
 
     def getemailactivityusercounts(self, period: str = "D7"):
-        # GET /reports/getEmailActivityUserCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getEmailActivityUserCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getEmailActivityUserCounts(period='{period}')"
 
@@ -788,8 +762,7 @@ class msgraphapi:
         return report_list
 
     def getemailactivitycounts(self, period: str = "D7"):
-        # GET /reports/getEmailActivityCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getEmailActivityCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getEmailActivityCounts(period='{period}')"
 
@@ -802,11 +775,10 @@ class msgraphapi:
 
         return report_list
 
-    # MAILBOX REPORTS
+    """ MAILBOX REPORTS """
 
     def getmailboxusagestorage(self, period: str = "D7"):
-        # GET /reports/getMailboxUsageStorage(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getMailboxUsageStorage(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getMailboxUsageStorage(period='{period}')"
 
@@ -820,8 +792,7 @@ class msgraphapi:
         return report_list
 
     def getmailboxusagequotastatusmailboxcounts(self, period: str = "D7"):
-        # GET /reports/getMailboxUsageQuotaStatusMailboxCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getMailboxUsageQuotaStatusMailboxCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getMailboxUsageQuotaStatusMailboxCounts(period='{period}')"
 
@@ -835,8 +806,7 @@ class msgraphapi:
         return report_list
 
     def getmailboxusagecounts(self, period: str = "D7"):
-        # GET /reports/getMailboxUsageMailboxCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getMailboxUsageMailboxCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getMailboxUsageStorage(period='{period}')"
 
@@ -850,8 +820,7 @@ class msgraphapi:
         return report_list
 
     def getmailboxusagedetail(self, period: str = "D7"):
-        # GET /reports/getMailboxUsageDetail(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getMailboxUsageDetail(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getMailboxUsageStorage(period='{period}')"
 
@@ -864,13 +833,10 @@ class msgraphapi:
 
         return report_list
 
-    # EMAIL APP REPORTS
+    """ EMAIL APP REPORTS """
 
     def getemailappuserdetailbyperiod(self, period: str = "D7"):
-        # GET /reports/getEmailAppUsageUserDetail(period='{period}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get details about which activities users performed on the various
-        # email apps by period.
+        """ GET /reports/getEmailAppUsageUserDetail(period='{period}') """
 
         request_string = f"{self.base_url}/reports/getEmailAppUsageUserDetail(period='{period}')"
 
@@ -884,10 +850,7 @@ class msgraphapi:
         return report_list
 
     def getemailappuserdetailbydate(self, date):
-        # GET /reports/getEmailAppUsageUserDetail(date='{date}')
-        # Date format must be YYYY-MM-DD
-        # Get details about which activities users performed on the various
-        # email apps by specific date.
+        """ GET /reports/getEmailAppUsageUserDetail(date='{date}') """
 
         request_string = f"{self.base_url}/reports/getEmailAppUsageUserDetail(date={date})"
 
@@ -901,9 +864,7 @@ class msgraphapi:
         return report_list
 
     def getemailappusageappsusercounts(self, period: str = "D7"):
-        # GET /reports/getEmailAppUsageAppsUserCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get the count of unique users per email app.
+        """ GET /reports/getEmailAppUsageAppsUserCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getEmailAppUsageAppsUserCounts(period='{period}')"
 
@@ -917,10 +878,7 @@ class msgraphapi:
         return report_list
 
     def getemailappusageusercounts(self, period: str = "D7"):
-        # GET /reports/getEmailAppUsageUserCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get the count of unique users that connected to Exchange Online using
-        # any email app.
+        """ GET /reports/getEmailAppUsageUserCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getEmailAppUsageUserCounts(period='{period}')"
 
@@ -934,9 +892,7 @@ class msgraphapi:
         return report_list
 
     def getemailappusageversionsusercounts(self, period: str = "D7"):
-        # GET /reports/getEmailAppUsageVersionsUserCounts(period='{period_value}')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
-        # Get the count of unique users by Outlook desktop version.
+        """ GET /reports/getEmailAppUsageVersionsUserCounts(period='{period_value}') """
 
         request_string = f"{self.base_url}/reports/getEmailAppUsageVersionsUserCounts(period='{period}')"
 
@@ -949,11 +905,10 @@ class msgraphapi:
 
         return report_list
 
-    # TEAMS REPORTS
+    """ TEAMS REPORTS """
 
     def getteamsuseractivitycounts(self, period: str = "D7"):
-        # GET /reports/getTeamsUserActivityCounts(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getTeamsUserActivityCounts(period='D7') """
 
         request_string = f"{self.base_url}/reports/getTeamsUserActivityCounts(period='{period}')"
 
@@ -967,8 +922,7 @@ class msgraphapi:
         return report_list
 
     def getteamsusercounts(self, period: str = "D7"):
-        # GET /reports/getTeamsUserActivityUserCounts(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getTeamsUserActivityUserCounts(period='D7') """
 
         request_string = f"{self.base_url}/reports/getTeamsUserActivityUserCounts(period='{period}')"
 
@@ -982,8 +936,7 @@ class msgraphapi:
         return report_list
 
     def getteamsuserdetailbyperiod(self, period: str = "D7"):
-        # GET /reports/getTeamsUserActivityUserDetail(period='D7')
-        # The supported values for {period_value} are: D7, D30, D90, and D180.
+        """ GET /reports/getTeamsUserActivityUserDetail(period='D7') """
 
         request_string = f"{self.base_url}/reports/getTeamsUserActivityUserDetail(period='{period}')"
 
@@ -997,8 +950,7 @@ class msgraphapi:
         return report_list
 
     def getteamsuserdetailbydate(self, date):
-        # GET /reports/getTeamsUserActivityUserDetail(date=YYYY-MM-DD)
-        # Date format must be YYYY-MM-DD
+        """ GET /reports/getTeamsUserActivityUserDetail(date=YYYY-MM-DD) """
 
         request_string = f"{self.base_url}/reports/getTeamsUserActivityUserDetail(date={date})"
 
@@ -1012,7 +964,7 @@ class msgraphapi:
         return report_list
 
     def getusersdelta(self, delta=None):
-        # Get incremental change for users
+        """ Get incremental change for users """
 
         header = {
             "Content-type": "application/json",
@@ -1040,14 +992,14 @@ class msgraphapi:
         return userlist, deltatoken
 
     def getgroupdelta(self, delta=None):
-        # Get incremental change for groups
+        """ Get incremental change for groups """
 
         header = {
             "Content-type": "application/json",
             "Authorization": "Bearer " + self.access_token2
         }
         if delta is None:
-            request_string = f"{self.bsae_url}/groups/delta?$select=members"
+            request_string = f"{self.base_url}/groups/delta?$select=members"
         else:
             request_string = delta
         response = requests.get(request_string, headers=header)
@@ -1068,7 +1020,7 @@ class msgraphapi:
         return groupdata, deltatoken
 
     def getgroupdeltanostate(self):
-        # Get a delta token with no state
+        """ Get a delta token with no state """
 
         header = {
             "Content-type": "application/json",
@@ -1081,7 +1033,7 @@ class msgraphapi:
         return deltatoken
 
     def getuserdeltanostate(self):
-        # Get a delta token with no state
+        """ Get a delta token with no state """
 
         header = {
             "Content-type": "application/json",
@@ -1094,10 +1046,10 @@ class msgraphapi:
         return deltatoken
 
     def getmanager(self, user):
-        # Gets the manager for a user
+        """ Gets the manager for a user """
 
         url_encoded = urllib.parse.quote_plus(f'{user}')
-        request_string = f"{self.bsae_url}/users/{url_encoded}/manager"
+        request_string = f"{self.base_url}/users/{url_encoded}/manager"
         header = {
             "Content-type": "application/json",
             "Authorization": "Bearer " + self.access_token2
@@ -1110,7 +1062,7 @@ class msgraphapi:
             return data['userPrincipalName']
 
     def assignmanager(self, user, manager):
-        # Creates an Enterprise app from the gallery given a template id
+        """ Creates an Enterprise app from the gallery given a template id """
         header = {
             "Content-type": "application/json",
             "Authorization": "Bearer " + self.access_token2
@@ -1126,3 +1078,27 @@ class msgraphapi:
             data=request_body,
             headers=header)
         return response.status_code
+
+    def checkmain(self, attrib):
+        """ Get a delta token with no state """
+        header = {
+            "Content-type": "application/json",
+            "Authorization": "Bearer " + self.access_token2
+        }
+        request_string = f"{self.base_url}/users/?$select={attrib}"
+        response = requests.get(request_string, headers=header)
+        data = response.json()
+        userdata = data['value']
+        next_url = ''
+        while True:
+            if '@odata.nextLink' in data:
+                if data['@odata.nextLink'] == next_url:
+                    break
+                next_url = data['@odata.nextLink']
+                next_data = requests.get(
+                    next_url, headers=self.header_params_GMC).json()
+                userdata += next_data['value']
+                data = next_data
+            else:
+                break
+        return userdata
