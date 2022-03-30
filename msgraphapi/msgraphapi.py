@@ -1,11 +1,11 @@
 #!/usr/bin/python
 from __future__ import division
-import requests
-import json
 import datetime
 import urllib
 import csv
+import json
 from io import StringIO
+import requests
 
 
 class msgraphapi:
@@ -119,13 +119,13 @@ class msgraphapi:
     def updateuserdetails(
             self,
             userguid,
-            businessPhones,
+            businessphones,
             department,
-            displayName,
-            givenName,
-            mobilePhone,
+            displayname,
+            givenname,
+            mobilephone,
             surname,
-            jobTitle,
+            jobtitle,
             mail):
         """ Updates the metadata for a user given the guid """
 
@@ -135,13 +135,13 @@ class msgraphapi:
             "Authorization": "Bearer " + self.access_token2
         }
         request_body = json.dumps({
-            "businessPhones": businessPhones,
+            "businessPhones": businessphones,
             "department": department,
-            "displayName": displayName,
-            "givenName": givenName,
-            "mobilePhone": mobilePhone,
+            "displayName": displayname,
+            "givenName": givenname,
+            "mobilePhone": mobilephone,
             "surname": surname,
-            "jobTitle": jobTitle,
+            "jobTitle": jobtitle,
             "mail": mail
         })
         response = requests.patch(
@@ -325,12 +325,14 @@ class msgraphapi:
         return users
 
     def getdirobject(self, directoryid):
+        """ Gets directory object ID"""
         request_string = f"{self.base_url}/directoryObjects/{directoryid}"
         response = requests.get(request_string, headers=self.header_params_GMC)
         data = response.json()
         return data
 
     def getgroupnamefromid(self, directoryid):
+        """ Gets group name form object ID """
         obj = self.getdirobject(directoryid)
         groupname = obj["displayName"]
 
@@ -463,16 +465,12 @@ class msgraphapi:
     def geto365groupowner(self, directoryid):
         """ Gets all office 365 groups without owners """
 
-        request_string = "https://graph.microsoft.com/v1.0/groups/" + directoryid + "/owners"
+        request_string = f"{self.base_url}/groups/{directoryid}/owners"
         response = requests.get(request_string, headers=self.header_params_GMC)
         data = response.json()
         owners = []
-        try:
-            for owner in data['value']:
-                owners.append(owner['userPrincipalName'])
-        except Exception as error:
-            print(error)
-            pass
+        for owner in data['value']:
+            owners.append(owner['userPrincipalName'])
         return owners
 
     def inviteuser(self, usermail, url):
@@ -646,15 +644,11 @@ class msgraphapi:
         request_string = f"{self.base_url}/auditLogs/signIns?&$filter=userPrincipalName eq '{upn}'"
         response = requests.get(request_string, headers=self.header_params_GMC)
         data = response.json()
-        try:
-            signins = data['value']
-            if len(signins) == 0:
-                return False
-            else:
-                return True
-        except Exception as e:
-            pass
-            return f"{upn},error"
+        signins = data['value']
+        if len(signins) == 0:
+            return False
+        else:
+            return True
 
     def getgroupid(self, groupname):
         """ Gets the ID of a group from it's displayname """
@@ -676,6 +670,7 @@ class msgraphapi:
         return response.url
 
     def enumerate_csv_report_response(self, response):
+        """ Enumerate a CSV report """
         report_list = []
         reader = csv.reader(StringIO(response))
         columns = []
@@ -705,7 +700,6 @@ class msgraphapi:
 
     def getmicrosoft365usercounts(self, period: str = "D7"):
         """ GET /reports/getOffice365ActiveUserCounts(period='D7') """
-        
         request_string = f"{self.base_url}/reports/getOffice365ActiveUserCounts(period='{period}')"
 
         try:
@@ -745,8 +739,6 @@ class msgraphapi:
 
         return report_list
 
-    """ EMAIL ACTIVITY REPORTS """
-
     def getemailactivityusercounts(self, period: str = "D7"):
         """ GET /reports/getEmailActivityUserCounts(period='{period_value}') """
 
@@ -774,8 +766,6 @@ class msgraphapi:
         report_list = self.enumerate_csv_report_response(response)
 
         return report_list
-
-    """ MAILBOX REPORTS """
 
     def getmailboxusagestorage(self, period: str = "D7"):
         """ GET /reports/getMailboxUsageStorage(period='{period_value}') """
@@ -832,8 +822,6 @@ class msgraphapi:
         report_list = self.enumerate_csv_report_response(response)
 
         return report_list
-
-    """ EMAIL APP REPORTS """
 
     def getemailappuserdetailbyperiod(self, period: str = "D7"):
         """ GET /reports/getEmailAppUsageUserDetail(period='{period}') """
@@ -904,8 +892,6 @@ class msgraphapi:
         report_list = self.enumerate_csv_report_response(response)
 
         return report_list
-
-    """ TEAMS REPORTS """
 
     def getteamsuseractivitycounts(self, period: str = "D7"):
         """ GET /reports/getTeamsUserActivityCounts(period='D7') """
