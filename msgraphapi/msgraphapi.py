@@ -1126,27 +1126,3 @@ class msgraphapi:
             data=request_body,
             headers=header)
         return response.status_code
-
-    def checkmain(self, attrib):
-        # Get a delta token with no state
-        header = {
-            "Content-type": "application/json",
-            "Authorization": "Bearer " + self.access_token2
-        }
-        request_string = f"{self.base_url}/users/?$select={attrib}"
-        response = requests.get(request_string, headers=header)
-        data = response.json()
-        userdata = data['value']
-        next_url = ''
-        while True:
-            if '@odata.nextLink' in data:
-                if data['@odata.nextLink'] == next_url:
-                    break
-                next_url = data['@odata.nextLink']
-                next_data = requests.get(
-                    next_url, headers=self.header_params_GMC).json()
-                userdata += next_data['value']
-                data = next_data
-            else:
-                break
-        return userdata
